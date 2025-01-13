@@ -39,11 +39,11 @@ export const createBooking = async (req, res) => {
 
 export const getBookingDetails = async (req, res) => {
   try {
-    const booking_id = req.query?.id;
+    const booking_id = req.query?.id ? parseInt(req.query.id) : undefined;
     const user_id = req.user.id;
 
     const bookings = await getBookingDetailsService(user_id, booking_id);
-    return res.status(200).json({ bookings });
+    return res.status(200).json({ bookings: Object.values(bookings) });
   } catch (error) {
     console.log(error);
     return error instanceof CustomError
@@ -57,6 +57,7 @@ export const updateBooking = async (req, res) => {
     const body = req.body;
     const booking_id = req.params.id;
     const booking_details = await updateBookingService(booking_id, body);
+
     return res
       .status(200)
       .json({ message: "Booking updated successfully", ...booking_details });

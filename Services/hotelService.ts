@@ -34,7 +34,7 @@ export const getAvailableRoomsService = async (query) => {
 export const createBookingService = async (id, body) => {
   const { check_in, check_out, room_ids } = body;
 
-  const connection = await (await db).getConnection();
+  const connection = await db.getConnection();
   await connection.beginTransaction();
 
   try {
@@ -44,14 +44,14 @@ export const createBookingService = async (id, body) => {
       connection
     );
 
-    await createBookedRoomsMapping(booking.id, room_ids, connection);
+    await createBookedRoomsMapping(booking.resultId, room_ids, connection);
 
     await connection.commit();
 
     return {
-      id: booking.id,
-      check_in: booking.check_in,
-      check_out: booking.check_out,
+      id: booking.resultId,
+      check_in: check_in,
+      check_out: check_out,
       room_ids,
     };
   } catch (error) {
@@ -71,6 +71,7 @@ export const getBookingDetailsService = async (id, booking_id) => {
         id: booking.booking_id,
         check_in: booking.check_in,
         check_out: booking.check_out,
+        booking_status: booking.booking_status ? "Booked" : "Cancelled",
         rooms: [],
       };
     }
@@ -83,11 +84,11 @@ export const getBookingDetailsService = async (id, booking_id) => {
     return acc;
   }, {});
 
-  return booking_id ? formatted_bookings[booking_id] : formatted_bookings;
+  return formatted_bookings;
 };
 
 export const updateBookingService = async (id, body) => {
-  const connection = await (await db).getConnection();
+  const connection = await db.getConnection();
   await connection.beginTransaction();
 
   try {
@@ -114,15 +115,16 @@ export const updateBookingService = async (id, body) => {
       return acc;
     }, {});
 
-    const is_possible = occupied_rooms.every((room) => {
-      if (available_rooms[room.room_type]) {
+    const is_possible = Object.keys(occupied_rooms).every((room) => {
+      const available = available_rooms.find((r) => r.room_type == room);
+      console.log(room, occupied_rooms[room], available);
+      if (available) {
         return (
-          !available_rooms[room.room_type].available_room_ids.length >
-          room.length
+          available.available_room_ids.length >= occupied_rooms[room].length
         );
+      } else {
+        return false;
       }
-
-      return false;
     });
 
     if (!is_possible) {
@@ -132,16 +134,13 @@ export const updateBookingService = async (id, body) => {
       );
     }
 
-    let new_room_ids = available_rooms.reduce((acc, room) => {
-      if (
-        room.available_room_ids.length >= occupied_rooms[room.room_type].length
-      ) {
-        acc.push(
-          ...room.available_room_ids.slice(
-            0,
-            occupied_rooms[room.room_type].length
-          )
-        );
+    let new_room_ids = Object.keys(occupied_rooms).reduce((acc, room) => {
+      const available = available_rooms.find((r) => r.room_type == room);
+
+      if (available) {
+        for (let i = 0; i < occupied_rooms[room].length; i++) {
+          acc.push(available.available_room_ids[i]);
+        }
       }
 
       return acc;

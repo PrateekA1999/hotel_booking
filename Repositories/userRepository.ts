@@ -6,7 +6,7 @@ export const getUserByEmailOrPhone = async (
   phone_number: string
 ) => {
   return await (
-    await db
+    await db.pool
   ).query(`SELECT id FROM users WHERE email = ? OR phone_number = ?`, [
     email,
     phone_number,
@@ -15,7 +15,7 @@ export const getUserByEmailOrPhone = async (
 
 export const getUserById = async (id: number): Promise<User[]> => {
   return await (
-    await db
+    await db.pool
   ).query(
     `SELECT CONCAT(first_name, ' ', last_name) AS name, email, phone_number FROM users WHERE id = ?`,
     [id]
@@ -24,7 +24,7 @@ export const getUserById = async (id: number): Promise<User[]> => {
 
 export const getUsersByIds = async (id: number[]) => {
   return await (
-    await db
+    await db.pool
   ).query(
     `SELECT id, CONCAT(first_name, ' ', last_name) AS name, email, phone_number, active FROM users WHERE id IN (?)`,
     [id]
@@ -36,7 +36,7 @@ export const getUserByEmailAndPassword = async (
   password: string
 ) => {
   return await (
-    await db
+    await db.pool
   ).query(`SELECT id FROM users WHERE email = ? AND password = sha1(?)`, [
     email,
     password,
@@ -45,7 +45,7 @@ export const getUserByEmailAndPassword = async (
 
 export const createUser = async (user: createPayload) => {
   return await (
-    await db
+    await db.pool
   ).query(
     `INSERT INTO users (first_name, last_name, email, password, phone_number, active) VALUES (?, ?, ?, sha1(?), ?, ?, ?) `,
     [
@@ -68,6 +68,6 @@ export const updateUser = async (id, user) => {
   const values = user.values();
 
   return await (
-    await db
+    await db.pool
   ).query(`UPDATE users SET ${updateCondition} WHERE id = ?`, [...values, id]);
 };

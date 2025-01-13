@@ -5,7 +5,8 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --watch ts-node ./index.ts"
+    "dev": "nodemon --watch ts-node ./index.ts",
+    "test": "ts-mocha"
   },
   "keywords": [],
   "author": "",
@@ -20,11 +21,19 @@
     "typescript": "^5.7.3"
   },
   "devDependencies": {
+    "@types/chai": "^5.0.1",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.5",
+    "@types/sinon": "^17.0.3",
+    "chai": "^5.1.2",
     "concurrently": "^9.1.2",
+    "jest": "^29.7.0",
+    "mocha": "^10.0.0",
     "nodemon": "^3.1.9",
+    "sinon": "^19.0.2",
+    "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2"
   }
 }

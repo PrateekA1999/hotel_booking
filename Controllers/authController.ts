@@ -1,18 +1,18 @@
-import { getUserByEmailAndPassword } from "../Repositories/userRepository";
-import jwt from "jsonwebtoken";
+import { CustomError } from "../Utils/customError";
+import { getToken } from "../Services/authService";
 
 export const login = async (req: any, res: any) => {
   const { email, password } = req.body;
+  try {
+    const token = await getToken(email, password);
 
-  const user = await getUserByEmailAndPassword(email, password);
-
-  if (user.length > 0) {
-    const token = jwt.sign({ email: user[0].email }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });
-
-    return res.status(200).json({ token });
-  } else {
-    return res.status(401).json({ message: "Invalid credentials" });
+    return res
+      .status(200)
+      .json({ message: "Login successful", data: { token } });
+  } catch (error) {
+    console.log(error);
+    return error instanceof CustomError
+      ? res.status(error.statusCode).json({ message: error.message })
+      : res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -11,4 +11,7 @@ const pool = createPool({
   connectionLimit: 10,
 });
 
-export default pool;
+export default {
+  pool,
+  getConnection: async (): Promise<any> => await (await pool).getConnection(),
+};
